@@ -40,14 +40,20 @@ model Session {
 }
 
 model User {
-    id            String       @id @default(cuid())
-    name          String?
-    email         String?      @unique
-    emailVerified DateTime?
-    image         String?
-    accounts      Account[]
-    sessions      Session[]
-    BillGroup     SplitGroup[]
+    id                     String         @id @default(cuid())
+    name                   String?
+    email                  String?        @unique
+    emailVerified          DateTime?
+    image                  String?
+    accounts               Account[]
+    sessions               Session[]
+    SplitGroup             SplitGroup[]
+    UsersOnGroup           UsersOnGroup[]
+    PaidTransactions       Transactions[] @relation("Paying User")
+    CreatedTransactions    Transactions[] @relation("Transaction Creator")
+    TransactionShareholder Transactions[] @relation("Included in Payment")
+    PayerSettlement        Settlements[]  @relation("Payer")
+    PayeeSettlement        Settlements[]  @relation("Payee")
 }
 
 model VerificationToken {
@@ -59,7 +65,40 @@ model VerificationToken {
 }
 
 model SplitGroup {
+    id            String         @id @default(cuid())
+    name          String?
+    creator       User           @relation(fields: [creatorId], references: [id])
+    creatorId     String
+    UsersOnGroup  UsersOnGroup[]
+    totalExpenses Int            @default(0)
+}
+
+model UsersOnGroup {
+    user         User       @relation(fields: [userId], references: [id])
+    userId       String
+    splitGroup   SplitGroup @relation(fields: [splitGroupId], references: [id])
+    splitGroupId String
+
+    @@id([userId, splitGroupId])
+}
+
+model Transactions {
     id           String  @id @default(cuid())
-    name         String?
-    participants User[]
+    name         String
+    amount       Int
+    splitEqually Boolean @default(true)
+    payingUser   User    @relation("Paying User", fields: [payingUserId], references: [id])
+    payingUserId String
+    creator      User    @relation("Transaction Creator", fields: [creatorId], references: [id])
+    creatorId    String
+    splitAmong   User[]  @relation("Included in Payment")
+}
+
+model Settlements {
+    id             String @id @default(cuid())
+    amount         Int
+    paidFrom       User   @relation("Payer", fields: [paidFromId], references: [id])
+    paidFromId     String
+    recievedBy     User   @relation("Payee", fields: [recievedFromId], references: [id])
+    recievedFromId String
 }

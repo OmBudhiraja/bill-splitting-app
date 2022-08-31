@@ -7,9 +7,19 @@ export const splitGroupRouter = createProtectedRouter()
     async resolve({ ctx }) {
       const myGroups = await ctx.prisma.splitGroup.findMany({
         where: {
-          participants: {
-            some: { id: ctx.session.user.id },
+          UsersOnGroup: {
+            some: {
+              userId: ctx.session.user.id,
+            },
           },
+        },
+        include: {
+          UsersOnGroup: {
+            include: {
+              user: true,
+            },
+          },
+          _count: true,
         },
       });
       return myGroups;
@@ -23,11 +33,21 @@ export const splitGroupRouter = createProtectedRouter()
       const group = await ctx.prisma.splitGroup.create({
         data: {
           name: input.name,
-          participants: {
-            connect: { id: ctx.session.user.id },
+          creatorId: ctx.session.user.id,
+          UsersOnGroup: {
+            create: {
+              userId: ctx.session.user.id,
+            },
           },
         },
-        include: { participants: true, _count: true },
+        include: {
+          UsersOnGroup: {
+            include: {
+              user: true,
+            },
+          },
+          _count: true,
+        },
       });
 
       return group;
@@ -53,12 +73,19 @@ export const splitGroupRouter = createProtectedRouter()
           id: input.groupId,
         },
         data: {
-          participants: {
-            connect: { id: ctx.session.user.id },
+          UsersOnGroup: {
+            create: {
+              userId: ctx.session.user.id,
+            },
           },
         },
         include: {
-          participants: true,
+          UsersOnGroup: {
+            include: {
+              user: true,
+            },
+          },
+          _count: true,
         },
       });
 

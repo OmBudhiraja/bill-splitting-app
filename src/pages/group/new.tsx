@@ -33,11 +33,11 @@ const NewGroup: NextPage = () => {
   return (
     <>
       <Head>
-        <title>New | BillSplitter</title>
+        <title>Create | BillSplitter</title>
       </Head>
       <div className="min-h-screen flex flex-col justify-center items-center gap-5">
-        <h1 className="text-2xl">Create a new Group</h1>
-        <form onSubmit={submitHandler} className="grid gap-5 w-full max-w-lg">
+        <h1 className="text-3xl text-slate-700">Create a new Group</h1>
+        <form onSubmit={submitHandler} className="grid gap-5 w-full max-w-lg p-5">
           <input
             disabled={isLoading}
             value={name}

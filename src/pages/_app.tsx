@@ -4,6 +4,7 @@ import { loggerLink } from '@trpc/client/links/loggerLink';
 import { withTRPC } from '@trpc/next';
 import { SessionProvider } from 'next-auth/react';
 import type { AppType } from 'next/dist/shared/lib/utils';
+import Head from 'next/head';
 import superjson from 'superjson';
 import type { AppRouter } from '../server/router';
 import '../styles/globals.css';
@@ -11,6 +12,20 @@ import '../styles/globals.css';
 const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => {
   return (
     <SessionProvider session={session}>
+      <Head>
+        <title>Billy</title>
+        <meta
+          name="description"
+          content="Billy - A Bill Spliting App to manage the bills and payments among the group"
+        />
+        <link rel="icon" href="/favicon.ico" />
+        <meta property="og:title" content="Billy - Manage Bills easily among Frientds" />
+        <meta
+          property="og:description"
+          content="Billy - A Bill Spliting App to manage the bills and payments among the group"
+        />
+        <meta property="og:type" content="website" />
+      </Head>
       <Component {...pageProps} />
     </SessionProvider>
   );
