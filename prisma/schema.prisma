@@ -71,6 +71,11 @@ model SplitGroup {
     creatorId     String
     UsersOnGroup  UsersOnGroup[]
     totalExpenses Int            @default(0)
+
+    createdAt    DateTime       @default(now())
+    updatedAt    DateTime       @updatedAt
+    Settlements  Settlements[]
+    Transactions Transactions[]
 }
 
 model UsersOnGroup {
@@ -92,6 +97,12 @@ model Transactions {
     creator      User    @relation("Transaction Creator", fields: [creatorId], references: [id])
     creatorId    String
     splitAmong   User[]  @relation("Included in Payment")
+
+    group        SplitGroup @relation(fields: [splitGroupId], references: [id])
+    splitGroupId String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model Settlements {
@@ -101,4 +112,10 @@ model Settlements {
     paidFromId     String
     recievedBy     User   @relation("Payee", fields: [recievedFromId], references: [id])
     recievedFromId String
+
+    group        SplitGroup @relation(fields: [splitGroupId], references: [id])
+    splitGroupId String
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }

@@ -6,7 +6,7 @@ const FullScreenLoader: React.FC = () => {
     <div className="h-screen flex items-center justify-center relative">
       <span className="sr-only">Loading...</span>
       <div aria-hidden="true">
-        <SpinnerIcon className="text-3xl animate-spin text-gray-700" />
+        <SpinnerIcon className="text-4xl animate-spin text-gray-700" />
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createProtectedRouter } from './protected-router';
 
 export const splitGroupRouter = createProtectedRouter()
-  .query('getmygroups', {
+  .query('getMyGroups', {
     async resolve({ ctx }) {
       const myGroups = await ctx.prisma.splitGroup.findMany({
         where: {

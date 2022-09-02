@@ -21,8 +21,11 @@ const SignInPage: NextPage = () => {
   return (
     <div className="flex flex-col h-screen items-center justify-center gap-3">
       SignInPage
-      <button className="btn block" onClick={() => signIn(undefined, { callbackUrl: '/' })}>
-        Sign In
+      <button className="btn block" onClick={() => signIn('github', { callbackUrl: '/' })}>
+        Sign In With Github
+      </button>
+      <button className="btn block" onClick={() => signIn('google', { callbackUrl: '/' })}>
+        Sign In With Google
       </button>
     </div>
   );

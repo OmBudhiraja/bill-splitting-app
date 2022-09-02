@@ -55,7 +55,7 @@ const Header: React.FC<Props> = ({ withUser = true }) => {
       <div className="flex-1 px-2 lg:flex-none">
         <Link href={'/'}>
           <a className="cursor-pointer" tabIndex={0}>
-            <img src="./logo.png" alt="Logo" className="h-10" />
+            <img src="/logo.png" alt="Logo" className="h-10" />
           </a>
         </Link>
       </div>
