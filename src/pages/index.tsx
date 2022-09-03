@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import type { NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import { inferQueryOutput, trpc } from '@/utils/trpc';
@@ -6,11 +7,14 @@ import FullScreenLoader from '@/components/FullScreenLoader';
 import { FormEventHandler, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { AiOutlinePlus as AddIcon, AiFillInfoCircle as InfoIcon } from 'react-icons/ai';
+import { HiUserGroup as UsersIcon, HiUser as SingleUserIcon } from 'react-icons/hi';
 import { Modal, OpenModalButton } from '@/components/Modal';
+import Link from 'next/link';
 
 const Home: NextPage = () => {
-  const { data, isLoading, error } = trpc.useQuery(['billGroup.getMyGroups']);
-  console.log(data, isLoading, error);
+  const { data, isLoading } = trpc.useQuery(['billGroup.getMyGroups']);
+
+  const newGroupModalId = 'create-new-group';
 
   const router = useRouter();
   const { status } = useSession();
@@ -26,16 +30,49 @@ const Home: NextPage = () => {
   }
 
   return (
-    <>
+    <div className="min-h-screen flex flex-col">
       <Header />
-      <main>{data && data.map((group) => <GroupCard group={group} key={group.id} />)}</main>
-      <OpenModalButton modalId="create-new-group">
-        <AddIcon size={26} />
-      </OpenModalButton>
-      <Modal title="Create a new Group" modalId="create-new-group">
+      <main className="flex-1 w-full max-w-xl m-auto px-5 py-10 flex flex-col">
+        {data && (
+          <>
+            {data.length === 0 ? (
+              <div className="flex-1 flex flex-col items-center justify-center gap-4 h-full">
+                <img
+                  className="w-full max-w-[25rem] mb-7"
+                  src="/empty_screen_illustration.svg"
+                  alt="Empty Screen Illustration"
+                />
+                <p className="text-xl text-gray-600">
+                  Looks like You don&apos;t have any Group yet.
+                </p>
+                <OpenModalButton modalId={newGroupModalId}>Create Your First Group</OpenModalButton>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-3xl">Your Groups</h1>
+                <section className="flex flex-col gap-5 mt-5">
+                  {data && data.map((group) => <GroupCard group={group} key={group.id} />)}
+                </section>
+              </>
+            )}
+          </>
+        )}
+      </main>
+
+      {data && data.length > 0 && (
+        <OpenModalButton
+          title="Add new Group"
+          modalId={newGroupModalId}
+          extraClasses="fixed bottom-10 right-10 md:bottom-16 md:right-16 btn-circle"
+        >
+          <span className="sr-only">Add New Group</span>
+          <AddIcon size={26} />
+        </OpenModalButton>
+      )}
+      <Modal title="Create a new Group" modalId={newGroupModalId}>
         <CreateNewGroup />
       </Modal>
-    </>
+    </div>
   );
 };
 
@@ -93,7 +130,39 @@ const CreateNewGroup: React.FC = () => {
 type Group = inferQueryOutput<'billGroup.getMyGroups'>[number];
 
 const GroupCard: React.FC<{ group: Group }> = ({ group }) => {
-  return <div>{group.name}</div>;
+  return (
+    <Link href={`/group/details/${group.id}`}>
+      <a className="bg-gray-200 p-5 rounded-lg flex items-center gap-2 cursor-pointer">
+        <div className="flex-1">
+          <h3 className="text-xl font-semibold">{group.name}</h3>
+          <p className="text-sm mt-1 font-normal">
+            Created by{' '}
+            <span className="font-medium block sm:inline">
+              {group.UsersOnGroup.find((u) => u.user.id === group.creatorId)?.user.name}
+            </span>
+          </p>
+          <p className="text-sm font-normal hidden sm:block">
+            on{' '}
+            <span className="font-normal">
+              {group.createdAt.toLocaleString('en', {
+                day: '2-digit',
+                month: 'short',
+                year: '2-digit',
+              })}
+            </span>
+          </p>
+          <p className="flex items-center gap-2 mt-2 text-gray-600">
+            {group._count.UsersOnGroup > 1 ? <UsersIcon /> : <SingleUserIcon />}
+            {group._count.UsersOnGroup}
+          </p>
+        </div>
+        <div>
+          <p className="text-sm">Total Expenses</p>
+          <p className="text-center text-lg font-semibold"> ₹ {group.totalExpenses}</p>
+        </div>
+      </a>
+    </Link>
+  );
 };
 
 export default Home;

@@ -7,7 +7,7 @@ export enum ActivityType {
   SETTLEMENT = 'SETTLEMENT',
 }
 
-export const splitGroupRouter = createProtectedRouter()
+export const activityRouter = createProtectedRouter()
   .query('getActivity', {
     input: z.object({
       groupId: z.string(),
@@ -56,6 +56,28 @@ export const splitGroupRouter = createProtectedRouter()
       return mergedAndSorted;
     },
   })
+  .query('getMySettlementRecords', {
+    input: z.object({
+      groupId: z.string(),
+    }),
+    async resolve({ ctx, input }) {
+      const allGroupTransactions = ctx.prisma.transactions.findMany({
+        where: {
+          splitGroupId: input.groupId,
+          splitAmong: {
+            some: {
+              id: ctx.session.user.id,
+            },
+          },
+        },
+        include: {
+          splitAmong: true,
+        },
+      });
+
+      return allGroupTransactions;
+    },
+  })
   .mutation('createTransaction', {
     input: z.object({
       groupId: z.string(),
@@ -88,6 +110,11 @@ export const splitGroupRouter = createProtectedRouter()
           splitAmong: {
             connect: input.splitAmong.map((u) => ({ id: u })),
           },
+        },
+        include: {
+          payingUser: true,
+          splitAmong: true,
+          creator: true,
         },
       });
 

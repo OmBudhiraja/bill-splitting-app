@@ -25,6 +25,36 @@ export const splitGroupRouter = createProtectedRouter()
       return myGroups;
     },
   })
+  .query('getGroupDetails', {
+    input: z.object({
+      groupId: z.string(),
+    }),
+    async resolve({ ctx, input }) {
+      const group = await ctx.prisma.splitGroup.findFirst({
+        where: {
+          id: input.groupId,
+          UsersOnGroup: {
+            some: {
+              userId: ctx.session.user.id,
+            },
+          },
+        },
+        include: {
+          UsersOnGroup: {
+            include: {
+              user: true,
+            },
+          },
+        },
+      });
+
+      if (!group) {
+        throw new TRPCError({ code: 'NOT_FOUND' });
+      }
+
+      return group;
+    },
+  })
   .mutation('create', {
     input: z.object({
       name: z.string(),
@@ -62,13 +92,22 @@ export const splitGroupRouter = createProtectedRouter()
         where: {
           id: input.groupId,
         },
+        include: {
+          UsersOnGroup: {
+            select: { userId: true },
+          },
+        },
       });
 
       if (!group) {
         throw new TRPCError({ code: 'NOT_FOUND' });
       }
 
-      const bill = await ctx.prisma.splitGroup.update({
+      if (group.UsersOnGroup.find((u) => u.userId === ctx.session.user.id)) {
+        return group;
+      }
+
+      const updatedGroup = await ctx.prisma.splitGroup.update({
         where: {
           id: input.groupId,
         },
@@ -89,6 +128,28 @@ export const splitGroupRouter = createProtectedRouter()
         },
       });
 
-      return bill;
+      const allGroupTransactions = await ctx.prisma.transactions.findMany({
+        where: {
+          splitGroupId: input.groupId,
+          splitEqually: true,
+        },
+      });
+
+      for (const each of allGroupTransactions) {
+        await ctx.prisma.transactions.update({
+          where: {
+            id: each.id,
+          },
+          data: {
+            splitAmong: {
+              connect: {
+                id: ctx.session.user.id,
+              },
+            },
+          },
+        });
+      }
+
+      return updatedGroup;
     },
   });

@@ -10,7 +10,7 @@ const SignInPage: NextPage = () => {
 
   useEffect(() => {
     if (status === 'authenticated') {
-      router.replace('/');
+      router.replace(router.query.redirect ? `${router.query.redirect}` : '/');
     }
   }, [status, router]);
 

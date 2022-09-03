@@ -1,12 +1,14 @@
 // src/pages/_app.tsx
+import type { AppType } from 'next/dist/shared/lib/utils';
+import Head from 'next/head';
 import { httpBatchLink } from '@trpc/client/links/httpBatchLink';
 import { loggerLink } from '@trpc/client/links/loggerLink';
 import { withTRPC } from '@trpc/next';
 import { SessionProvider } from 'next-auth/react';
-import type { AppType } from 'next/dist/shared/lib/utils';
-import Head from 'next/head';
+import { ToastContainer } from 'react-toastify';
 import superjson from 'superjson';
 import type { AppRouter } from '../server/router';
+import 'react-toastify/dist/ReactToastify.css';
 import '../styles/globals.css';
 
 const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => {
@@ -27,6 +29,7 @@ const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => 
         <meta property="og:type" content="website" />
       </Head>
       <Component {...pageProps} />
+      <ToastContainer autoClose={3000} />
     </SessionProvider>
   );
 };
