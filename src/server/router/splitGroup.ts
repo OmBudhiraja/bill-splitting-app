@@ -57,7 +57,7 @@ export const splitGroupRouter = createProtectedRouter()
   })
   .mutation('create', {
     input: z.object({
-      name: z.string(),
+      name: z.string().min(3),
     }),
     async resolve({ ctx, input }) {
       const group = await ctx.prisma.splitGroup.create({
@@ -151,5 +151,22 @@ export const splitGroupRouter = createProtectedRouter()
       }
 
       return updatedGroup;
+    },
+  })
+  .mutation('updateName', {
+    input: z.object({
+      groupId: z.string(),
+      name: z.string().min(3),
+    }),
+    async resolve({ ctx, input }) {
+      const updated = ctx.prisma.splitGroup.update({
+        where: {
+          id: input.groupId,
+        },
+        data: {
+          name: input.name,
+        },
+      });
+      return updated;
     },
   });

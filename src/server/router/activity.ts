@@ -1,10 +1,26 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { TRPCError } from '@trpc/server';
 import { z } from 'zod';
 import { createProtectedRouter } from './protected-router';
+import { type User } from '@prisma/client';
 
 export enum ActivityType {
   TRANSACTION = 'TRANSACTION',
   SETTLEMENT = 'SETTLEMENT',
+}
+
+function mergeWithSameId<S extends (User & { amount: number })[]>(arr: S): S {
+  return arr.reduce((acc, cur) => {
+    const index = acc.findIndex((r) => r.id === cur.id);
+    if (index >= 0 && typeof acc[index] !== undefined) {
+      /** NOTE: Typescript is weird sometimes */
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      acc[index]!.amount += cur.amount;
+    } else {
+      acc.push(cur);
+    }
+    return acc;
+  }, [] as unknown as S);
 }
 
 export const activityRouter = createProtectedRouter()
@@ -61,7 +77,7 @@ export const activityRouter = createProtectedRouter()
       groupId: z.string(),
     }),
     async resolve({ ctx, input }) {
-      const allGroupTransactions = ctx.prisma.transactions.findMany({
+      const allGroupTransactions = await ctx.prisma.transactions.findMany({
         where: {
           splitGroupId: input.groupId,
           splitAmong: {
@@ -71,11 +87,83 @@ export const activityRouter = createProtectedRouter()
           },
         },
         include: {
+          payingUser: true,
           splitAmong: true,
+          _count: true,
         },
       });
 
-      return allGroupTransactions;
+      const allGroupSettlements = await ctx.prisma.settlements.findMany({
+        where: {
+          OR: [{ paidFromId: ctx.session.user.id }, { recievedById: ctx.session.user.id }],
+        },
+        include: {
+          paidFrom: true,
+          recievedBy: true,
+        },
+      });
+
+      const owesToMe: (User & { amount: number })[] = [];
+
+      const iOweThem: (User & { amount: number })[] = [];
+      let myTotalExpenditure = 0;
+
+      allGroupTransactions.forEach((t) => {
+        const dividedAmount = Math.round(t.amount / t._count.splitAmong);
+        if (t.payingUserId === ctx.session.user.id) {
+          myTotalExpenditure += t.amount;
+          t.splitAmong.forEach((u) => {
+            u.id !== ctx.session.user.id && owesToMe.push({ amount: dividedAmount, ...u });
+          });
+        } else {
+          iOweThem.push({
+            amount: dividedAmount,
+            ...t.payingUser,
+          });
+        }
+      });
+
+      const owesToMeMerged = mergeWithSameId(owesToMe);
+      const iOweThemMerged = mergeWithSameId(iOweThem).map((r) => ({
+        ...r,
+        amount: -Math.abs(r.amount),
+      }));
+
+      const debtBeforeSettlement = mergeWithSameId([...owesToMeMerged, ...iOweThemMerged]).filter(
+        (r) => r.amount !== 0
+      );
+
+      myTotalExpenditure += debtBeforeSettlement.reduce((acc, cur) => acc + -cur.amount, 0);
+
+      const netDebt = debtBeforeSettlement
+        .map((record) => {
+          return allGroupSettlements
+            .filter(
+              (settlement) =>
+                record.id === settlement.paidFromId || record.id === settlement.recievedById
+            )
+            .reduce(
+              (acc, settlementWithUser) => {
+                if (record.id === settlementWithUser.paidFromId) {
+                  return {
+                    ...acc,
+                    amount: record.amount - settlementWithUser.amount,
+                  };
+                } else {
+                  return {
+                    ...acc,
+                    amount: record.amount + settlementWithUser.amount,
+                  };
+                }
+              },
+              { ...record } as User & {
+                amount: number;
+              }
+            );
+        })
+        .filter((rec) => rec.amount !== 0);
+
+      return { netDebt, myTotalExpenditure };
     },
   })
   .mutation('createTransaction', {
@@ -88,6 +176,13 @@ export const activityRouter = createProtectedRouter()
       splitAmong: z.array(z.string()),
     }),
     async resolve({ ctx, input }) {
+      if (!input.splitEqually && input.splitAmong.length < 2) {
+        throw new TRPCError({
+          code: 'BAD_REQUEST',
+          message: 'Atleast Select two Users to split amount between.',
+        });
+      }
+
       const userInGroup = await ctx.prisma.usersOnGroup.findFirst({
         where: {
           splitGroupId: input.groupId,
@@ -137,7 +232,7 @@ export const activityRouter = createProtectedRouter()
       groupId: z.string(),
       amount: z.number().min(1),
       paidFromId: z.string(),
-      recievedFromId: z.string(),
+      recievedById: z.string(),
     }),
     async resolve({ ctx, input }) {
       const userInGroup = await ctx.prisma.usersOnGroup.findFirst({
@@ -156,7 +251,7 @@ export const activityRouter = createProtectedRouter()
           amount: input.amount,
           splitGroupId: input.groupId,
           paidFromId: input.paidFromId,
-          recievedFromId: input.recievedFromId,
+          recievedById: input.recievedById,
         },
       });
 

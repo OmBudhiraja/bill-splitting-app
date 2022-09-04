@@ -2,13 +2,13 @@
 import type { NextPage } from 'next';
 import { useSession } from 'next-auth/react';
 import { inferQueryOutput, trpc } from '@/utils/trpc';
-import Header from '@/components/Header';
-import FullScreenLoader from '@/components/FullScreenLoader';
+import Header from '@/components/shared/Header';
+import FullScreenLoader from '@/components/shared/FullScreenLoader';
 import { FormEventHandler, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { AiOutlinePlus as AddIcon, AiFillInfoCircle as InfoIcon } from 'react-icons/ai';
 import { HiUserGroup as UsersIcon, HiUser as SingleUserIcon } from 'react-icons/hi';
-import { Modal, OpenModalButton } from '@/components/Modal';
+import { Modal, OpenModalButton } from '@/components/shared/Modal';
 import Link from 'next/link';
 
 const Home: NextPage = () => {

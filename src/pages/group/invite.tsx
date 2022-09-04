@@ -4,7 +4,7 @@ import { useRouter } from 'next/router';
 import { useEffect } from 'react';
 import { trpc } from '@/utils/trpc';
 import { useSession } from 'next-auth/react';
-import FullScreenLoader from '@/components/FullScreenLoader';
+import FullScreenLoader from '@/components/shared/FullScreenLoader';
 
 const PageContent: React.FC<{ id: string }> = ({ id }) => {
   const { mutate } = trpc.useMutation('billGroup.addPerson', {

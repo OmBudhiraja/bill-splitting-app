@@ -1,4 +1,4 @@
-import FullScreenLoader from '@/components/FullScreenLoader';
+import FullScreenLoader from '@/components/shared/FullScreenLoader';
 import type { NextPage } from 'next';
 import { signIn, useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';

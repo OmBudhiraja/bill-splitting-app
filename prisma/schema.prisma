@@ -106,12 +106,12 @@ model Transactions {
 }
 
 model Settlements {
-    id             String @id @default(cuid())
-    amount         Int
-    paidFrom       User   @relation("Payer", fields: [paidFromId], references: [id])
-    paidFromId     String
-    recievedBy     User   @relation("Payee", fields: [recievedFromId], references: [id])
-    recievedFromId String
+    id           String @id @default(cuid())
+    amount       Int
+    paidFrom     User   @relation("Payer", fields: [paidFromId], references: [id])
+    paidFromId   String
+    recievedBy   User   @relation("Payee", fields: [recievedById], references: [id])
+    recievedById String
 
     group        SplitGroup @relation(fields: [splitGroupId], references: [id])
     splitGroupId String

@@ -10,7 +10,10 @@ export const Modal: React.FC<React.PropsWithChildren<{ title: string; modalId: s
     <>
       <input type="checkbox" id={modalId} className="modal-toggle" />
       <label htmlFor={modalId} className="modal">
-        <label htmlFor="" className="modal-box relative w-3/4 max-w-3xl custom-scrollbar">
+        <label
+          htmlFor=""
+          className="modal-box relative w-full sm:w-3/4 max-w-3xl m-3 custom-scrollbar"
+        >
           <label htmlFor={modalId} className="btn btn-sm btn-circle absolute right-3 top-3">
             ✕
           </label>
