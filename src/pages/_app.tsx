@@ -24,16 +24,10 @@ const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => 
     <SessionProvider session={session}>
       <Head>
         <title>Billy</title>
-        <meta
-          name="description"
-          content="Billy - A Bill Spliting App to manage the bills and payments among the group"
-        />
+        <meta name="description" content="Billy - Bill Splitting Made Easy" />
         <link rel="icon" href="/favicon.ico" />
         <meta property="og:title" content="Billy - Manage Bills easily among Frientds" />
-        <meta
-          property="og:description"
-          content="Billy - A Bill Spliting App to manage the bills and payments among the group"
-        />
+        <meta property="og:description" content="Billy - Bill Splitting Made Easy" />
         <meta property="og:type" content="website" />
       </Head>
       <Component {...pageProps} />
