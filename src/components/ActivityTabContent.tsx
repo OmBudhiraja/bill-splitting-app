@@ -156,23 +156,27 @@ const TransactionCard: React.FC<{ transaction: ActivityTransactionRes }> = ({ tr
 
 const SettlementCard: React.FC<{ settlement: ActivitySettlementRes }> = ({ settlement }) => {
   return (
-    <div className="bg-gray-200 border-2 border-blue-500 px-3 py-5 sm:p-5 rounded-lg flex items-center justify-center gap-3 sm:gap-4 cursor-default">
-      <img
-        src={settlement.paidFrom.image ?? '/default-user.png'}
-        alt={settlement.paidFrom.name ?? ''}
-        className="h-10 w-10 rounded-full overflow-hidden bg-gray-500"
-      />
-      <p>
+    <div className="bg-gray-200 border-2 border-blue-500 px-3 py-5 sm:p-5 rounded-lg flex items-center justify-center cursor-default">
+      <div className="h-8 w-8 sm:h-10 sm:w-10 ">
+        <img
+          src={settlement.paidFrom.image ?? '/default-user.png'}
+          alt={settlement.paidFrom.name ?? ''}
+          className="h-full w-full bg-cover rounded-full overflow-hidden bg-gray-500"
+        />
+      </div>
+      <p className="px-3 sm:px-4 flex-1">
         <strong>{settlement.paidFrom.name} </strong>
         paid
         <strong> ₹ {settlement.amount}</strong> to
         <strong> {settlement.recievedBy.name}</strong>
       </p>
-      <img
-        src={settlement.recievedBy.image ?? '/default-user.png'}
-        alt={settlement.recievedBy.name ?? ''}
-        className="h-10 w-10 rounded-full overflow-hidden bg-gray-500"
-      />
+      <div className="h-8 w-8 sm:h-10 sm:w-10 ">
+        <img
+          src={settlement.recievedBy.image ?? '/default-user.png'}
+          alt={settlement.recievedBy.name ?? ''}
+          className="h-full w-full bg-cover rounded-full overflow-hidden bg-gray-500"
+        />
+      </div>
     </div>
   );
 };
