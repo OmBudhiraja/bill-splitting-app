@@ -1,15 +1,23 @@
 // src/pages/_app.tsx
 import type { AppType } from 'next/dist/shared/lib/utils';
+import type { AppRouter } from '../server/router';
 import Head from 'next/head';
+import { Router } from 'next/router';
 import { httpBatchLink } from '@trpc/client/links/httpBatchLink';
 import { loggerLink } from '@trpc/client/links/loggerLink';
 import { withTRPC } from '@trpc/next';
 import { SessionProvider } from 'next-auth/react';
 import { ToastContainer } from 'react-toastify';
 import superjson from 'superjson';
-import type { AppRouter } from '../server/router';
+import nProgress from 'nprogress';
+
 import 'react-toastify/dist/ReactToastify.css';
+import '../styles/nprogress.css';
 import '../styles/globals.css';
+
+Router.events.on('routeChangeStart', nProgress.start);
+Router.events.on('routeChangeError', nProgress.done);
+Router.events.on('routeChangeComplete', nProgress.done);
 
 const MyApp: AppType = ({ Component, pageProps: { session, ...pageProps } }) => {
   return (

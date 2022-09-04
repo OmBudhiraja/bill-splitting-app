@@ -17,6 +17,8 @@ import SummaryTabContent from '@/components/SummaryTabContent';
 import { toast } from 'react-toastify';
 import { User, UsersOnGroup, type SplitGroup } from '@prisma/client';
 import { Modal, OpenModalButton } from '@/components/shared/Modal';
+import Head from 'next/head';
+import NotFoundPage from '@/pages/404';
 
 const GroupInvite: NextPage = () => {
   const { query } = useRouter();
@@ -33,7 +35,7 @@ const GroupInvite: NextPage = () => {
 };
 
 const PageContent: React.FC<{ groupId: string }> = ({ groupId }) => {
-  const { data, isLoading } = trpc.useQuery(['billGroup.getGroupDetails', { groupId }]);
+  const { data, isLoading, error } = trpc.useQuery(['billGroup.getGroupDetails', { groupId }]);
 
   const [activeTab, setActiveTab] = useState<'activity' | 'summary'>('activity');
 
@@ -49,45 +51,53 @@ const PageContent: React.FC<{ groupId: string }> = ({ groupId }) => {
     }
   }, [status, router, groupId]);
 
+  if (error?.data?.httpStatus === 404) {
+    return <NotFoundPage />;
+  }
   if (status !== 'authenticated' || isLoading || !data) {
     return <FullScreenLoader />;
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <GroupDetailsSection groupDetails={data} />
-      <main className="flex-1 w-full max-w-xl m-auto px-5 py-10 flex flex-col">
-        <div className="tabs tabs-boxed w-fit mx-auto">
-          <a
-            onClick={() => setActiveTab('activity')}
-            className={`tab min-w-[6rem] md:min-w-[10rem] ${
-              activeTab === 'activity' ? 'tab-active' : ''
-            }`}
-          >
-            Activity
-          </a>
-          <a
-            onClick={() => setActiveTab('summary')}
-            className={`tab min-w-[6rem] md:min-w-[10rem] ${
-              activeTab === 'summary' ? 'tab-active' : ''
-            }`}
-          >
-            Your Summary
-          </a>
-        </div>
-        {activeTab === 'activity' && (
-          <ActivityTabContent
-            groupId={groupId}
-            currentUserId={session.user?.id ?? ''}
-            groupUsers={data.UsersOnGroup.map((obj) => obj.user)}
-          />
-        )}
-        {activeTab === 'summary' && (
-          <SummaryTabContent totalExpenses={data.totalExpenses} groupId={groupId} />
-        )}
-      </main>
-    </div>
+    <>
+      <Head>
+        <title>{data.name} | Billy</title>
+      </Head>
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <GroupDetailsSection groupDetails={data} />
+        <main className="flex-1 w-full max-w-xl m-auto px-5 py-10 flex flex-col">
+          <div className="tabs tabs-boxed w-fit mx-auto">
+            <a
+              onClick={() => setActiveTab('activity')}
+              className={`tab min-w-[6rem] md:min-w-[10rem] ${
+                activeTab === 'activity' ? 'tab-active' : ''
+              }`}
+            >
+              Activity
+            </a>
+            <a
+              onClick={() => setActiveTab('summary')}
+              className={`tab min-w-[6rem] md:min-w-[10rem] ${
+                activeTab === 'summary' ? 'tab-active' : ''
+              }`}
+            >
+              Your Summary
+            </a>
+          </div>
+          {activeTab === 'activity' && (
+            <ActivityTabContent
+              groupId={groupId}
+              currentUserId={session.user?.id ?? ''}
+              groupUsers={data.UsersOnGroup.map((obj) => obj.user)}
+            />
+          )}
+          {activeTab === 'summary' && (
+            <SummaryTabContent totalExpenses={data.totalExpenses} groupId={groupId} />
+          )}
+        </main>
+      </div>
+    </>
   );
 };
 
@@ -106,7 +116,7 @@ const GroupDetailsSection: React.FC<{ groupDetails: GroupDetails }> = ({ groupDe
   const { data: session } = useSession();
   const { mutate, isLoading } = trpc.useMutation('billGroup.updateName', {
     onSuccess: (data) => {
-      setGroupName(data.name);
+      setGroupName(data.name ?? '');
     },
   });
 

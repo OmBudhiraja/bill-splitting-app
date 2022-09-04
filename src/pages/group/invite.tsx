@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { trpc } from '@/utils/trpc';
 import { useSession } from 'next-auth/react';
 import FullScreenLoader from '@/components/shared/FullScreenLoader';
+import Head from 'next/head';
 
 const PageContent: React.FC<{ id: string }> = ({ id }) => {
   const { mutate } = trpc.useMutation('billGroup.addPerson', {
@@ -40,6 +41,9 @@ const GroupInvite: NextPage = () => {
 
   return (
     <div>
+      <Head>
+        <title>Invite | Billy</title>
+      </Head>
       <PageContent id={router.query.id} />
     </div>
   );

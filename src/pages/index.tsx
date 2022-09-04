@@ -10,6 +10,7 @@ import { AiOutlinePlus as AddIcon, AiFillInfoCircle as InfoIcon } from 'react-ic
 import { HiUserGroup as UsersIcon, HiUser as SingleUserIcon } from 'react-icons/hi';
 import { Modal, OpenModalButton } from '@/components/shared/Modal';
 import Link from 'next/link';
+import Head from 'next/head';
 
 const Home: NextPage = () => {
   const { data, isLoading } = trpc.useQuery(['billGroup.getMyGroups']);
@@ -30,49 +31,56 @@ const Home: NextPage = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <Header />
-      <main className="flex-1 w-full max-w-xl m-auto px-5 py-10 flex flex-col">
-        {data && (
-          <>
-            {data.length === 0 ? (
-              <div className="flex-1 flex flex-col items-center justify-center gap-4 h-full">
-                <img
-                  className="w-full max-w-[25rem] mb-7"
-                  src="/empty_screen_illustration.svg"
-                  alt="Empty Screen Illustration"
-                />
-                <p className="text-xl text-gray-600">
-                  Looks like You don&apos;t have any Group yet.
-                </p>
-                <OpenModalButton modalId={newGroupModalId}>Create Your First Group</OpenModalButton>
-              </div>
-            ) : (
-              <>
-                <h1 className="text-3xl">Your Groups</h1>
-                <section className="flex flex-col gap-5 mt-5">
-                  {data && data.map((group) => <GroupCard group={group} key={group.id} />)}
-                </section>
-              </>
-            )}
-          </>
-        )}
-      </main>
+    <>
+      <Head>
+        <title>Dashboard | Billy</title>
+      </Head>
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-1 w-full max-w-xl m-auto px-5 py-10 flex flex-col">
+          {data && (
+            <>
+              {data.length === 0 ? (
+                <div className="flex-1 flex flex-col items-center justify-center gap-4 h-full">
+                  <img
+                    className="w-full max-w-[25rem] mb-7"
+                    src="/empty_screen_illustration.svg"
+                    alt="Empty Screen Illustration"
+                  />
+                  <p className="text-xl text-gray-600">
+                    Looks like You don&apos;t have any Group yet.
+                  </p>
+                  <OpenModalButton modalId={newGroupModalId}>
+                    Create Your First Group
+                  </OpenModalButton>
+                </div>
+              ) : (
+                <>
+                  <h1 className="text-3xl">Your Groups</h1>
+                  <section className="flex flex-col gap-5 mt-5">
+                    {data && data.map((group) => <GroupCard group={group} key={group.id} />)}
+                  </section>
+                </>
+              )}
+            </>
+          )}
+        </main>
 
-      {data && data.length > 0 && (
-        <OpenModalButton
-          title="Add new Group"
-          modalId={newGroupModalId}
-          extraClasses="fixed bottom-10 right-10 md:bottom-16 md:right-16 btn-circle"
-        >
-          <span className="sr-only">Add New Group</span>
-          <AddIcon size={26} />
-        </OpenModalButton>
-      )}
-      <Modal title="Create a new Group" modalId={newGroupModalId}>
-        <CreateNewGroup />
-      </Modal>
-    </div>
+        {data && data.length > 0 && (
+          <OpenModalButton
+            title="Add new Group"
+            modalId={newGroupModalId}
+            extraClasses="fixed bottom-10 right-10 md:bottom-16 md:right-16 btn-circle"
+          >
+            <span className="sr-only">Add New Group</span>
+            <AddIcon size={26} />
+          </OpenModalButton>
+        )}
+        <Modal title="Create a new Group" modalId={newGroupModalId}>
+          <CreateNewGroup />
+        </Modal>
+      </div>
+    </>
   );
 };
 

@@ -47,17 +47,25 @@ const UserInfoDropDown: React.FC = () => {
 
 interface Props {
   withUser?: boolean;
+  unlinkLogo?: boolean;
 }
 
-const Header: React.FC<Props> = ({ withUser = true }) => {
+const Header: React.FC<Props> = ({ withUser = true, unlinkLogo = false }) => {
   return (
     <div className="navbar bg-base-300 p-4">
       <div className="flex-1 px-2 lg:flex-none">
-        <Link href={'/'}>
-          <a className="cursor-pointer" tabIndex={0}>
+        {unlinkLogo ? (
+          <>
+            {' '}
             <img src="/logo.png" alt="Logo" className="h-10" />
-          </a>
-        </Link>
+          </>
+        ) : (
+          <Link href={'/'}>
+            <a className="cursor-pointer" tabIndex={-1}>
+              <img src="/logo.png" alt="Logo" className="h-10" />
+            </a>
+          </Link>
+        )}
       </div>
       {withUser && <UserInfoDropDown />}
     </div>
