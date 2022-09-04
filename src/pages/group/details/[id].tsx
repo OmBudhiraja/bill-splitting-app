@@ -103,11 +103,16 @@ const GroupDetailsSection: React.FC<{ groupDetails: GroupDetails }> = ({ groupDe
   const [enableGroupNameEditing, setEnableGroupNameEditing] = useState(false);
   const [groupName, setGroupName] = useState(groupDetails.name ?? '');
 
-  const { isLoading } = trpc.useMutation('billGroup.updateName');
+  const { data: session } = useSession();
+  const { mutate, isLoading } = trpc.useMutation('billGroup.updateName', {
+    onSuccess: (data) => {
+      setGroupName(data.name);
+    },
+  });
 
   return (
     <section className="m-4 rounded-lg px-5 py-5 bg-slate-200 text-gray-900 flex items-center gap-3 justify-between">
-      <h3 className="text-xl font-semibold line-clamp-1 cursor-default">{groupDetails.name}</h3>
+      <h3 className="text-xl font-semibold line-clamp-1 cursor-default">{groupName}</h3>
       <div className="flex flex-col sm:flex-row items-center gap-2">
         <OpenModalButton modalId={groupDetailsModalId} extraClasses="btn-ghost btn-active btn-sm">
           Group Details
@@ -131,12 +136,7 @@ const GroupDetailsSection: React.FC<{ groupDetails: GroupDetails }> = ({ groupDe
             <label className="label">
               <span className="label-text">Group Name</span>
             </label>
-            <form
-              className="input-group rounded-lg"
-              onSubmit={(e) => {
-                e.preventDefault();
-              }}
-            >
+            <div className="input-group rounded-lg">
               <input
                 disabled={!enableGroupNameEditing || isLoading}
                 value={groupName}
@@ -144,20 +144,35 @@ const GroupDetailsSection: React.FC<{ groupDetails: GroupDetails }> = ({ groupDe
                 type="text"
                 placeholder="Road Trip"
                 className="input input-bordered w-full"
-                required
-                minLength={3}
               />
-              <button
-                type="submit"
-                disabled={isLoading}
-                className={`btn btn-square ${isLoading ? 'loading' : ''}`}
-                onClick={() => {
-                  setEnableGroupNameEditing((prev) => !prev);
-                }}
+              <div
+                className="tooltip tooltip-left"
+                data-tip={
+                  session?.user?.id !== groupDetails.creatorId
+                    ? 'Only Group Creator can edit Name'
+                    : 'Click to edit Name'
+                }
               >
-                {enableGroupNameEditing ? <SaveIcon /> : <EditIcon />}
-              </button>
-            </form>
+                <button
+                  disabled={isLoading || session?.user?.id !== groupDetails.creatorId}
+                  className={`btn btn-square ${isLoading ? 'loading' : ''}`}
+                  onClick={() => {
+                    if (enableGroupNameEditing) {
+                      if (groupName.length > 2) {
+                        mutate({ groupId: groupDetails.id, name: groupName });
+                        setEnableGroupNameEditing(false);
+                      } else {
+                        toast.error('Group Name lenght should be atleast 3');
+                      }
+                    } else {
+                      setEnableGroupNameEditing(true);
+                    }
+                  }}
+                >
+                  {!isLoading ? <>{enableGroupNameEditing ? <SaveIcon /> : <EditIcon />}</> : ''}
+                </button>
+              </div>
+            </div>
           </div>
           <hr className="mt-6 mb-4" />
           <div>
