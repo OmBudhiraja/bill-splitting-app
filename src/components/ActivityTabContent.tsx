@@ -1,6 +1,12 @@
 /* eslint-disable @next/next/no-img-element */
 import type React from 'react';
-import { type Settlements, type Transactions, type User } from '@prisma/client';
+import {
+  type SplitGroup,
+  type UsersOnGroup,
+  type Settlements,
+  type Transactions,
+  type User,
+} from '@prisma/client';
 import { trpc } from '@/utils/trpc';
 import AutoAnimate from './shared/AutoAnimate';
 import { Modal, OpenModalButton } from './shared/Modal';
@@ -197,13 +203,24 @@ const CreateNewTranaction: React.FC<{
   const { data: session } = useSession();
 
   const { mutate, isLoading } = trpc.useMutation('activity.createTransaction', {
+    onMutate: (data) => {
+      trpcContext.setQueryData(['billGroup.getGroupDetails'], (prev) => {
+        return { ...prev, totalExpenses: prev?.totalExpenses ?? 0 + data.amount } as SplitGroup & {
+          UsersOnGroup: (UsersOnGroup & {
+            user: User;
+          })[];
+        };
+      });
+    },
     onSuccess: (data) => {
       resetForm();
       ((document.getElementById(newTransactionModalId) as HTMLInputElement) ?? {}).checked = false;
       trpcContext.setQueryData(['activity.getActivity'], (prev) => {
         return [{ type: 'TRANSACTION' as ActivityType, data }, ...(prev ?? [])];
       });
+      trpcContext.invalidateQueries('billGroup.getGroupDetails');
       trpcContext.invalidateQueries('activity.getActivity');
+      trpcContext.invalidateQueries('activity.getMySettlementRecords');
     },
   });
 
