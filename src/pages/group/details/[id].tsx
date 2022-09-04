@@ -83,7 +83,9 @@ const PageContent: React.FC<{ groupId: string }> = ({ groupId }) => {
             groupUsers={data.UsersOnGroup.map((obj) => obj.user)}
           />
         )}
-        {activeTab === 'summary' && <SummaryTabContent groupId={groupId} />}
+        {activeTab === 'summary' && (
+          <SummaryTabContent totalExpenses={data.totalExpenses} groupId={groupId} />
+        )}
       </main>
     </div>
   );
@@ -101,7 +103,7 @@ const GroupDetailsSection: React.FC<{ groupDetails: GroupDetails }> = ({ groupDe
   const [enableGroupNameEditing, setEnableGroupNameEditing] = useState(false);
   const [groupName, setGroupName] = useState(groupDetails.name ?? '');
 
-  const { mutation, isLoading } = trpc.useMutation('billGroup.updateName');
+  const { isLoading } = trpc.useMutation('billGroup.updateName');
 
   return (
     <section className="m-4 rounded-lg px-5 py-5 bg-slate-200 text-gray-900 flex items-center gap-3 justify-between">
@@ -168,7 +170,7 @@ const GroupDetailsSection: React.FC<{ groupDetails: GroupDetails }> = ({ groupDe
             {groupDetails.UsersOnGroup.map((u) => (
               <div key={u.user.id} className="flex p-2 rounded-md gap-5 bg-gray-200">
                 <img
-                  className="h-10 w-10 rounded-full"
+                  className="h-10 w-10 rounded-full overflow-hidden bg-gray-500"
                   src={u.user.image ?? '/default-user.png'}
                   alt={u.user.name ?? ''}
                 />

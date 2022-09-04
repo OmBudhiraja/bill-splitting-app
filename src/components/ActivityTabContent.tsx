@@ -105,7 +105,7 @@ const TransactionCard: React.FC<{ transaction: ActivityTransactionRes }> = ({ tr
     <div className="bg-gray-200 px-3 py-5 sm:p-5 rounded-lg flex items-center gap-3 sm:gap-4 cursor-default">
       <div>
         <img
-          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full"
+          className="h-8 w-8 sm:h-10 sm:w-10 rounded-full overflow-hidden bg-gray-500"
           src={transaction.payingUser.image ?? '/default-user.png'}
           alt={transaction.payingUser.name ?? 'Unnamed'}
         />
@@ -137,7 +137,7 @@ const TransactionCard: React.FC<{ transaction: ActivityTransactionRes }> = ({ tr
           {transaction.splitAmong.slice(0, 4).map((u) => (
             <img
               title={u.name ?? 'Unnamed'}
-              className="h-6 w-6 rounded-full bg-gray-900 overflow-hidden"
+              className="h-6 w-6 rounded-full bg-gray-500 overflow-hidden"
               key={u.id}
               src={u.image ?? '/default-user.png'}
               alt={u.name ?? 'Unnamed'}
@@ -160,7 +160,7 @@ const SettlementCard: React.FC<{ settlement: ActivitySettlementRes }> = ({ settl
       <img
         src={settlement.paidFrom.image ?? '/default-user.png'}
         alt={settlement.paidFrom.name ?? ''}
-        className="h-10 w-10 rounded-full"
+        className="h-10 w-10 rounded-full overflow-hidden bg-gray-500"
       />
       <p>
         <strong>{settlement.paidFrom.name} </strong>
@@ -171,7 +171,7 @@ const SettlementCard: React.FC<{ settlement: ActivitySettlementRes }> = ({ settl
       <img
         src={settlement.recievedBy.image ?? '/default-user.png'}
         alt={settlement.recievedBy.name ?? ''}
-        className="h-10 w-10 rounded-full"
+        className="h-10 w-10 rounded-full overflow-hidden bg-gray-500"
       />
     </div>
   );

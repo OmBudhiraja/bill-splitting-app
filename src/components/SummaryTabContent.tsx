@@ -6,7 +6,10 @@ import { AiOutlineArrowRight as RightArrowIcon } from 'react-icons/ai';
 import { trpc } from '@/utils/trpc';
 import { Modal, OpenModalButton } from './shared/Modal';
 
-const SummaryTabContent: React.FC<{ groupId: string }> = ({ groupId }) => {
+const SummaryTabContent: React.FC<{
+  groupId: string;
+  totalExpenses: number;
+}> = ({ groupId, totalExpenses }) => {
   const { data: records, isLoading } = trpc.useQuery([
     'activity.getMySettlementRecords',
     { groupId },
@@ -14,7 +17,19 @@ const SummaryTabContent: React.FC<{ groupId: string }> = ({ groupId }) => {
 
   const { data: session } = useSession();
 
-  console.log(records);
+  console.log(
+    records,
+    records?.netDebt.reduce((acc, cur) => acc + cur.amount, 0)
+  );
+
+  const peopleOweMe =
+    records?.netDebt.reduce((acc, cur) => (cur.amount > 0 ? acc + cur.amount : acc), 0) ?? '-';
+  const iOwePeople =
+    records?.netDebt.reduce((acc, cur) => {
+      console.log('acc', acc, cur.amount, cur.amount < 0);
+
+      return cur.amount < 0 ? acc + Math.abs(cur.amount) : acc;
+    }, 0) ?? '-';
 
   if (isLoading || !records) {
     return (
@@ -28,7 +43,7 @@ const SummaryTabContent: React.FC<{ groupId: string }> = ({ groupId }) => {
   }
 
   return (
-    <main className="p-5 mt-8 flex flex-col gap-5">
+    <main className="p-5 mt-4 flex flex-col gap-5">
       <>
         {records.netDebt.length === 0 ? (
           <>
@@ -36,6 +51,31 @@ const SummaryTabContent: React.FC<{ groupId: string }> = ({ groupId }) => {
           </>
         ) : (
           <>
+            <section className="bg-slate-700 px-2 py-4 sm:p-5 rounded-lg text-gray-300 flex justify-center flex-col items-center gap-5">
+              <div className="flex items-center justify-evenly gap-2 w-full">
+                <h2 className="text-base sm:text-lg text-center">
+                  Total Expenses <br /> <strong>₹ {totalExpenses}</strong>
+                </h2>
+                <div className=" w-[1px] h-10 bg-gray-500" />
+                <h2 className="text-base sm:text-lg  text-center">
+                  Your Expenses
+                  <br />
+                  <strong>₹ {records.myTotalExpenditure}</strong>
+                </h2>
+              </div>
+              <hr className="w-4/5 sm:w-3/4 bg-gray-700 opacity-30" />
+              <div className="flex items-center justify-evenly gap-2 w-full">
+                <h2 className="text-base sm:text-lg text-center">
+                  You owe People <br /> <strong>₹ {iOwePeople}</strong>
+                </h2>
+                <div className=" w-[1px] h-10 bg-gray-500" />
+                <h2 className="text-base sm:text-lg  text-center">
+                  People owe you
+                  <br />
+                  <strong>₹ {peopleOweMe}</strong>
+                </h2>
+              </div>
+            </section>
             {records.netDebt.map((r) => (
               <div
                 key={r.id}
@@ -45,7 +85,7 @@ const SummaryTabContent: React.FC<{ groupId: string }> = ({ groupId }) => {
                   {((src: string, alt: string) => (
                     <img
                       src={src}
-                      className="bg-gray-500 hidden sm:block h-10 w-10 rounded-full"
+                      className="bg-gray-500 hidden sm:block h-10 w-10 rounded-full overflow-hidden"
                       alt={alt}
                     />
                   ))(
@@ -79,7 +119,7 @@ const SummaryTabContent: React.FC<{ groupId: string }> = ({ groupId }) => {
                   {((src: string, alt: string) => (
                     <img
                       src={src}
-                      className="bg-gray-500 hidden sm:block h-10 w-10  rounded-full"
+                      className="bg-gray-500 hidden sm:block h-10 w-10  rounded-full overflow-hidden"
                       alt={alt}
                     />
                   ))(

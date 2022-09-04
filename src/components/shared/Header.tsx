@@ -15,7 +15,7 @@ const UserInfoDropDown: React.FC = () => {
             className="avatar focus:outline-none  focus-visible:ring-2 focus-visible:ring-slate-900 focus-visible:ring-opacity-75 rounded-full"
           >
             <div
-              className={`w-10 rounded-full cursor-pointer bg-gray-400 ${
+              className={`w-10 h-10 overflow-hidden rounded-full cursor-pointer bg-gray-400 ${
                 status === 'loading' && 'animate-pulse'
               }`}
             >
