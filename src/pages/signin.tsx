@@ -28,9 +28,9 @@ const SignInPage: NextPage = () => {
       </Head>
       <div className="min-h-screen flex flex-col">
         <Header withUser={false} unlinkLogo={true} />
-        <section className="flex-1 flex flex-col sm:flex-row mt-10 items-center justify-between gap-3">
+        <section className="flex-1 flex flex-col sm:flex-row mb-5 mt-6 md:mt-10 items-center justify-between gap-3">
           <div className="flex-1 flex flex-col items-center justify-center gap-5 px-5 py-0">
-            <h1 className="text-6xl text-center font-semibold leading-tight">
+            <h1 className="text-4xl md:text-6xl text-center font-semibold md:leading-tight">
               Split the bill{' '}
               <span className="text-[#261f82]">
                 {' '}
@@ -38,7 +38,7 @@ const SignInPage: NextPage = () => {
               </span>
             </h1>
 
-            <p className="text-lg text-gray-600">
+            <p className="text-lg text-center text-gray-600">
               Manage your Bills with Friends Effortlessly
               <br />
               Sign Up to access the App
